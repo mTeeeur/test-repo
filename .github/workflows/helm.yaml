@@ -1,0 +1,18 @@
+name: Deploy
+on:
+  release:
+    types: [created]
+
+jobs:
+  deployment:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Deploy
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: |-
+            helm repo add chart-repo ${{ secrets.CHART_REPO }}
+            helm upgrade --wait --debug --install booking-core chart-repo/booking-core
+            --namespace default
+            --set booking_core.image.tag=test-${{CI_COMMIT_SHA}}
+          kubeconfig: '${{ secrets.KUBECONFIG }}'
